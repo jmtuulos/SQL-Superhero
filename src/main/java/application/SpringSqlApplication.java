@@ -9,18 +9,12 @@ import org.springframework.context.annotation.ComponentScan;
 import repositories.CustomerRepository;
 
 @SpringBootApplication
-@ComponentScan("repositories")
 public class SpringSqlApplication implements ApplicationRunner {
-    @Autowired
-    CustomerRepository customerRepository;
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringSqlApplication.class, args);
+        SpringApplication.run(PgAppRunner.class, args);
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        customerRepository.test();
-
-    }
+    public void run(ApplicationArguments args){}
 }
