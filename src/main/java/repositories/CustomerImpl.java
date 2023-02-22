@@ -25,11 +25,27 @@ public class CustomerImpl implements CustomerRepository {
     @Override
     public List<Customer> listAll() {
         return null;
+
     }
 
     @Override
-    public Object getById(Object id) {
+    public Customer getById(Integer id) {
         return null;
+    }
+
+    @Override
+    public Customer create(Customer customer) {
+        return null;
+    }
+
+    @Override
+    public Customer update(Customer customer) {
+        return null;
+    }
+
+    @Override
+    public void delete(Integer id) {
+
     }
 
     public void test() {
