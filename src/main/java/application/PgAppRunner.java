@@ -7,16 +7,19 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 import repositories.CustomerRepository;
 
+
 @Component
 @ComponentScan("repositories")
 public class PgAppRunner implements ApplicationRunner {
 
+    CustomerRepository customerRepository;
     @Autowired
     public PgAppRunner(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-
+        // Run your code here
     }
 }
