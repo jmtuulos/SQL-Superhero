@@ -1,6 +1,9 @@
 package repositories;
 
 import models.Customer;
+import models.CustomerCountry;
+import models.CustomerGenre;
+import models.CustomerSpender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -9,9 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 @Repository
 public class CustomerImpl implements CustomerRepository {
-    private final String url;
-    private final String username;
-    private final String password;
+    protected final String url;
+    protected final String username;
+    protected final String password;
     private Connection conn = null;
     public CustomerImpl(
             @Value("${spring.datasource.url}") String url,
@@ -114,6 +117,64 @@ public class CustomerImpl implements CustomerRepository {
         }
         return result != 0;
     }
+
+    @Override
+    public CustomerCountry countryWithMostCustomers() {
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            PreparedStatement preparedStatement =
+                    conn.prepareStatement("SELECT country, COUNT(*) AS count FROM customer GROUP BY country ORDER BY count DESC LIMIT 1");
+            ResultSet result = preparedStatement.executeQuery();
+            if (!result.next())
+                return null;
+            return new CustomerCountry(result.getString("country"), result.getInt("count"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    //return customerSpender who has highest total in invoice table
+    public CustomerSpender customerWithHighestTotal() {
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            PreparedStatement preparedStatement =
+                    conn.prepareStatement("SELECT first_name, last_name, SUM(total) AS total FROM customer INNER JOIN invoice ON customer.customer_id = invoice.customer_id GROUP BY customer.customer_id ORDER BY total DESC LIMIT 1");
+            ResultSet result = preparedStatement.executeQuery();
+            if (!result.next())
+                return null;
+            return new CustomerSpender(
+                    result.getString("first_name"),
+                    result.getString("last_name"),
+                    result.getInt("total")
+            );
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //return customerGenre for a given customer with their favourite genre in case of tie return both
+
+    @Override
+    public List<CustomerGenre> customerFavouriteGenre(int id) {
+        List<CustomerGenre> customerGenres = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            PreparedStatement preparedStatement =
+                    conn.prepareStatement("SELECT customer.customer_id, genre.name AS genre, COUNT(*) AS count FROM customer INNER JOIN invoice ON customer.customer_id = invoice.customer_id INNER JOIN invoice_line ON invoice.invoice_id = invoice_line.invoice_id INNER JOIN track ON invoice_line.track_id = track.track_id INNER JOIN genre ON track.genre_id = genre.genre_id WHERE customer.customer_id = ? GROUP BY genre.name, customer.customer_id ORDER BY count DESC LIMIT 2");
+            preparedStatement.setInt(1, id);
+            ResultSet result = preparedStatement.executeQuery();
+            while (result.next()) {
+                CustomerGenre customerGenre = new CustomerGenre(
+                        result.getInt("customer_id"),
+                        result.getString("genre"),
+                        result.getInt("count")
+                );
+                customerGenres.add(customerGenre);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return customerGenres;
+    }
+
 
     @Override
     public void delete(Integer id) {

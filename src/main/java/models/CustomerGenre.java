@@ -1,20 +1,22 @@
 package models;
 
 public class CustomerGenre {
-    private String Genre;
+    private int customerId;
+    private String favouriteGenre;
     private int count;
 
-    public CustomerGenre(String genre, int count) {
-        this.Genre = genre;
+    public CustomerGenre(int customerId, String favouriteGenre, int count) {
+        this.favouriteGenre = favouriteGenre;
+        this.customerId = customerId;
         this.count = count;
     }
 
-    public String getGenre() {
-        return Genre;
+    public String getFavouriteGenre() {
+        return favouriteGenre;
     }
 
     public void setGenre(String genre) {
-        this.Genre = genre;
+        this.favouriteGenre = genre;
     }
 
     public int getCount() {
@@ -23,5 +25,13 @@ public class CustomerGenre {
 
     public void setCount(int count) {
         this.count = count;
+    }
+
+    public int getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
     }
 }
