@@ -1,12 +1,14 @@
 package repositories;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface CRUDRepository<T, U> {
-    List<T> listAll();
+    List<T> listAll() throws SQLException;
     T getById(U id);
-    T create(T t);
-    T update(T t);
+    T getByName(String name);
+    boolean create(T t);
+    boolean update(T t);
     void delete(U id);
 
 }
