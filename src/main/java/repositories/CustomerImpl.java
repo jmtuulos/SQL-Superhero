@@ -15,7 +15,6 @@ public class CustomerImpl implements CustomerRepository {
     protected final String url;
     protected final String username;
     protected final String password;
-    private Connection conn = null;
     public CustomerImpl(
             @Value("${spring.datasource.url}") String url,
             @Value("${spring.datasource.username}") String username,
@@ -26,7 +25,7 @@ public class CustomerImpl implements CustomerRepository {
     }
 
     @Override
-    public List<Customer> listAll() throws SQLException {
+    public List<Customer> listAll(){
         List<Customer> customers = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             PreparedStatement preparedStatement =
@@ -133,7 +132,7 @@ public class CustomerImpl implements CustomerRepository {
     }
 
 
-    //return customerSpender who has highest total in invoice table
+    //return customerSpender who has the highest total in invoice table
     public CustomerSpender customerWithHighestTotal() {
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             PreparedStatement preparedStatement =
@@ -151,16 +150,17 @@ public class CustomerImpl implements CustomerRepository {
         }
     }
 
-    //return customerGenre for a given customer with their favourite genre in case of tie return both
-
+    //return customerGenre for a given customer in case of tie return both
     @Override
-    public List<CustomerGenre> customerFavouriteGenre(int id) {
+    public List<CustomerGenre> customerFavouriteGenre(Customer customer) {
         List<CustomerGenre> customerGenres = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             PreparedStatement preparedStatement =
-                    conn.prepareStatement("SELECT customer.customer_id, genre.name AS genre, COUNT(*) AS count FROM customer INNER JOIN invoice ON customer.customer_id = invoice.customer_id INNER JOIN invoice_line ON invoice.invoice_id = invoice_line.invoice_id INNER JOIN track ON invoice_line.track_id = track.track_id INNER JOIN genre ON track.genre_id = genre.genre_id WHERE customer.customer_id = ? GROUP BY genre.name, customer.customer_id ORDER BY count DESC LIMIT 2");
-            preparedStatement.setInt(1, id);
+                    conn.prepareStatement("SELECT customer.customer_id, genre.name AS genre, COUNT(*) AS count FROM customer INNER JOIN invoice ON customer.customer_id = invoice.customer_id INNER JOIN invoice_line ON invoice.invoice_id = invoice_line.invoice_id INNER JOIN track ON invoice_line.track_id = track.track_id INNER JOIN genre ON track.genre_id = genre.genre_id WHERE customer.customer_id = ? GROUP BY genre.name, customer.customer_id ORDER BY count DESC FETCH FIRST 1 ROWS WITH TIES");
+            preparedStatement.setInt(1, customer.getCustomer_id());
             ResultSet result = preparedStatement.executeQuery();
+
+
             while (result.next()) {
                 CustomerGenre customerGenre = new CustomerGenre(
                         result.getInt("customer_id"),
@@ -175,11 +175,6 @@ public class CustomerImpl implements CustomerRepository {
         return customerGenres;
     }
 
-
-    @Override
-    public void delete(Integer id) {
-
-    }
     @Override
     public Customer getByName(String name) {
         Customer customer = null;
@@ -205,7 +200,7 @@ public class CustomerImpl implements CustomerRepository {
         }
     }
 
-    public List<Customer> listCustomersOffsetLimit(int limit, int offset) throws SQLException {
+    public List<Customer> listCustomersOffsetLimit(int limit, int offset) {
         List<Customer> customers = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             PreparedStatement preparedStatement =
