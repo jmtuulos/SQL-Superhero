@@ -9,6 +9,5 @@ public interface CRUDRepository<T, U> {
     T getByName(String name);
     boolean create(T t);
     boolean update(T t);
-    void delete(U id);
 
 }
