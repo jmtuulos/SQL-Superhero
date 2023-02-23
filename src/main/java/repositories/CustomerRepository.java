@@ -17,6 +17,7 @@ public interface CustomerRepository extends CRUDRepository<Customer, Integer>{
     CustomerCountry countryWithMostCustomers();
 
     CustomerSpender customerWithHighestTotal();
+    List<Customer> listCustomersOffsetLimit(int offset, int limit);
+    List<CustomerGenre> customerFavouriteGenre(Customer customer);
 
-    List<CustomerGenre> customerFavouriteGenre(int id);
 }
